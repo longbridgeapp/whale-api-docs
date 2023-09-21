@@ -1,0 +1,14 @@
+{
+  "version.label": {
+    "message": "Next",
+    "description": "The label for version current"
+  },
+  "sidebar.docsSidebar.category.准备开发": {
+    "message": "准备开发",
+    "description": "The label for category 准备开发 in sidebar docsSidebar"
+  },
+  "sidebar.docsSidebar.category.Q&A": {
+    "message": "Q&A",
+    "description": "The label for category Q&A in sidebar docsSidebar"
+  }
+}

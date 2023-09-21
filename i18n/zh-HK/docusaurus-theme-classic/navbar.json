@@ -1,23 +1,35 @@
 {
-  "item.label.开发者认证": {
-    "message": "開發者認證",
-    "description": "Navbar item with label 開發者認證"
+  "logo.alt": {
+    "message": "LongbridgeWhale",
+    "description": "The alt text of navbar logo"
+  },
+  "item.label.首页": {
+    "message": "首頁",
+    "description": "Navbar item with label  首页"
+  },
+  "item.label.产品": {
+    "message": "產品",
+    "description": "Navbar item with label 产品"
+  },
+  "item.label.解决方案": {
+    "message": "解決方案",
+    "description": "Navbar item with label 解决方案"
+  },
+  "item.label.API": {
+    "message": "API",
+    "description": "Navbar item with label API"
   },
   "item.label.SDK": {
     "message": "SDK",
     "description": "Navbar item with label SDK"
   },
-  "item.label.文档": {
-    "message": "文檔",
-    "description": "Navbar item with label 文檔"
+  "item.label.关于我们": {
+    "message": "關於我們",
+    "description": "Navbar item with label 关于我们"
   },
-  "item.label.社区": {
-    "message": "社群",
-    "description": "Navbar item with label community"
-  },
-  "item.label.市场": {
-    "message": "市場",
-    "description": "Navbar item with label market"
+  "item.label.媒体报道": {
+    "message": "媒體報道",
+    "description": "Navbar item with label 媒体报道"
   },
   "item.label.GitHub": {
     "message": "GitHub",

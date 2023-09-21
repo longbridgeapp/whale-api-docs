@@ -128,15 +128,14 @@ const config = {
           alt: 'LongbridgeWhale',
           href: '/',
           target: '_self',
-          src:
-            '<span role="img" style="line-height:0" class="anticon align-top"><svg width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false" class=""><use xlink:href="#icon-cloud-logo"></use></svg></span>',
+          src: 'https://assets.lbkrs.com/uploads/d29e591d-0c3d-4def-b837-cd06dfb4d738/whale-logo.svg',
         },
         items: [
           {
             to: '/',
             position: 'left',
             target: '_self',
-            label: ' 首页',
+            label: '首页',
             activeBaseRegex: '^/$',
           },
           {
@@ -166,7 +165,7 @@ const config = {
             position: 'left',
           },
           {
-            to: '/whale-reports',
+            to: '/reports',
             label: '媒体报道',
             position: 'left',
           },
