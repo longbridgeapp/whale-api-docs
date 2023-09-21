@@ -1,0 +1,36 @@
+name: Deploy Canary
+on:
+  push:
+    branches:
+      - main
+      - canary
+      - build-test
+jobs:
+  deploy_canary:
+    name: build
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: yarn
+
+      - name: install dependency npm
+        run: yarn
+
+      - name: build canary env dist file
+        run: |
+          yarn build:canary
+
+      - name: upload canary dist to s3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.FE_S3_OPEN_STATIC_CANARY_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.FE_S3_OPEN_STATIC_CANARY_ACCESS_KEY_SECRET }}
+        run: |
+          aws --region=${{ secrets.CANARY_HK_AWS_DEFAULT_REGION }} s3 sync ./dist s3://${{ secrets.FE_S3_OPEN_STATIC_CANARY_BUCKET }}/whale-api-docs/ --exclude "*.map" --exclude "*.html" --exclude "*.xml" --cache-control max-age=31536000
+          aws --region=${{ secrets.CANARY_HK_AWS_DEFAULT_REGION }} s3 sync ./dist s3://${{ secrets.FE_S3_OPEN_STATIC_CANARY_BUCKET }}/whale-api-docs/ --exclude "*" --include "*.html" --include "*.xml" --cache-control no-cache

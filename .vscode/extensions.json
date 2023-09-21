@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "aeschli.vscode-css-formatter",
+    "bradlc.vscode-tailwindcss",
+    "csstools.postcss",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "huacnlee.autocorrect",
+    "bierner.markdown-preview-github-styles"
+  ]
+}
