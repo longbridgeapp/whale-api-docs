@@ -1,0 +1,45 @@
+swagger: "2.0"
+info:
+  description: "该接口用于创建官方号内容"
+  version: "v1"
+  title: "创建官方号内容"
+paths:
+  /v1/whaleapi/social/media-topics:
+    post:
+      parameters:
+        - name: "title"
+          type: "string"
+          description: "内容标题，创建长文内容时需要"
+        - name: "body"
+          type: "string"
+          description: "内容"
+          required: true
+        - name: "images"
+          type: string[]
+          description: "图片链接，创建短文内容附件图片"
+      responses:
+        "200":
+          description: "创建成功"
+          schema:
+            $ref: "#/definitions/create_media_topic_response"
+        "400":
+          description: "创建失败，请求参数错误"
+      request_body:
+        type: "python"
+        value: |
+          curl -v -XPOST https://openapi.longportapp.com/v1/whaleapi/social/media-topics \
+          -d '{ "body": "美股今天为什么涨了", "title": "" \
+          -H "X-Api-Signature: {签名}" -H "X-Api-Key: {AppKey}" \
+          -H "Authorization: {AccessToken}" -H "X-Timestamp: 1539095200.123"
+          -H "Content-Type: application/json; charset=utf-8"
+      response_body: { "code": 0, "message": "", "data": { "id": "1" } }
+definitions:
+  create_media_topic_response:
+    type: "object"
+    required:
+      - id
+    properties:
+      id:
+        type: "integer"
+        description: "内容 ID"
+        required: true
