@@ -132,22 +132,73 @@ const config = {
         },
         items: [
           {
-            to: '/',
+            href: '/',
             position: 'left',
             target: '_self',
-            label: '首页',
+            html: '首页',
             activeBaseRegex: '^/$',
           },
           {
-            to: `/front-desk`,
             label: '产品',
-            target: '_self',
             position: 'left',
+            items: [
+              {
+                target: '_self',
+                html: '柜台系统 - 前中台',
+                href: '/front-desk',
+              },
+              {
+                target: '_self',
+                html: '柜台系统 - 后台',
+                href: '/backoffice',
+              },
+              {
+                target: '_self',
+                html: 'LongPort 社区',
+                href: '/longport',
+              },
+              {
+                target: '_self',
+                html: 'PortAI',
+                href: '/portai',
+              },
+              {
+                target: '_self',
+                html: '投放系统',
+                href: '/delivery-system',
+              },
+              {
+                target: '_self',
+                html: '营销系统',
+                href: '/marketing',
+              },
+              {
+                target: '_self',
+                html: '零售终端',
+                href: '/retail',
+              },
+            ],
           },
           {
-            to: '/solutions/app-plus',
             label: '解决方案',
             position: 'left',
+            items: [
+              {
+                target: '_self',
+                html: '互联网 App + 解决方案',
+                href: '/solutions/app-plus',
+              },
+              {
+                target: '_self',
+                html: '证券柜台解决方案',
+                href: '/solutions/securities-market',
+              },
+              {
+                target: '_self',
+                html: '虚拟资产解决方案',
+                href: '/solutions/virtual-assets',
+              },
+            ],
           },
           {
             to: '/docs',
@@ -155,21 +206,15 @@ const config = {
             position: 'left',
           },
           {
-            to: '/sdk',
-            label: 'SDK',
-            position: 'left',
+            html: '关于我们',
+            target: '_self',
+            href: '/about',
           },
           {
-            to: '/about',
-            label: '关于我们',
-            position: 'left',
+            html: '媒体报道',
+            target: '_self',
+            href: '/whale-reports',
           },
-          {
-            to: '/reports',
-            label: '媒体报道',
-            position: 'left',
-          },
-
           {
             type: 'localeDropdown',
             position: 'right',
