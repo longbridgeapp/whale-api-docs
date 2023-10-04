@@ -5,6 +5,7 @@ on:
     branches:
       - "!main"
       - "!canary"
+      - "!release"
 jobs:
   build:
     name: Build Test
