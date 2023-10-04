@@ -51,7 +51,7 @@ LongPort 提供接入底層服務的 HTTP / WebSockets 接口以及封裝在上�
 
 ### 行情類
 
-請訪問閲讀：[行情權限與限制](/docs/quote/level)
+請訪問閲讀：[行情權限與限制](/api/quote/level)
 
 ## 使用費用
 

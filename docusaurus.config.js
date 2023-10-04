@@ -24,7 +24,7 @@ const config = {
   customFields: {
     isDev: process.env.STAGE === 'dev',
   },
-  favicon: 'https://pub.lbkrs.com/static/offline/202211/qohHsXzN9qtQ23ox/longport_favicon.png',
+  favicon: 'https://assets.lbkrs.com/uploads/d29e591d-0c3d-4def-b837-cd06dfb4d738/whale-logo.svg',
   plugins: [
     'docusaurus-plugin-sass',
     function docusaurusTailwindCss() {
@@ -66,6 +66,8 @@ const config = {
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
+          path: 'api',
+          routeBasePath: '/api',
           sidebarPath: require.resolve('./sidebars.js'),
           // todo I18n lang should redirect other dir
           editUrl: ({ locale, docPath }) => {
@@ -201,7 +203,7 @@ const config = {
             ],
           },
           {
-            to: '/docs',
+            to: '/api',
             label: 'API',
             position: 'left',
           },

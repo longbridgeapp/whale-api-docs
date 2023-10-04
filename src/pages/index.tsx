@@ -14,7 +14,7 @@ const IndexPageShouldRedirect = () => {
 
   // local dev should redirect to /docs
   if (isDev) {
-    path = defaultLocale === currentLocale ? '/docs' : `/${currentLocale}/docs`
+    path = defaultLocale === currentLocale ? '/api' : `/${currentLocale}/api`
   }
 
   useEffect(() => {

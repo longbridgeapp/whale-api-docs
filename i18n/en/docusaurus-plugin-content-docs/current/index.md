@@ -52,7 +52,7 @@ All APIs have minimal invoke interval limitation, so same API can't be invoking 
 
 ### Quotes
 
-Please visit [Quote Permissions and Restrictions](/docs/quote/level) for details.
+Please visit [Quote Permissions and Restrictions](/api/quote/level) for details.
 
 ## Pricing
 
