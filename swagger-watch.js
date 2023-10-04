@@ -34,11 +34,11 @@ function generateSwaggerDoc(file) {
     let jsContent = YAML.load(fs.readFileSync(`./${fileName}`))
     let apiObj = JSON.parse(beautifyJson(jsContent, null, 2))
 
-    let distPath = fileName.replace('swagger-docs', 'docs').replace(/\.(yml|yaml)/, '--autogen.md')
+    let distPath = fileName.replace('swagger-docs', 'api').replace(/\.(yml|yaml)/, '--autogen.md')
     distPath = path.resolve(__dirname, distPath)
     if (locale !== 'zh-CN') {
       distPath = distPath
-        .replace(`/docs/${locale}/`, `/i18n/${locale}/docusaurus-plugin-content-docs/current/`)
+        .replace(`/api/${locale}/`, `/i18n/${locale}/docusaurus-plugin-content-docs/current/`)
         .replace(/\.(yml|yaml)/, '--autogen.md')
     } else {
       // default locale should put /docs directory
