@@ -2,9 +2,7 @@ name: Deploy Release
 on:
   push:
     branches:
-      - main
       - release
-      - build-test
 jobs:
   deploy_release:
     name: build
@@ -15,6 +13,15 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Download ossutils zip
+        run: |
+          wget https://github.com/aliyun/ossutil/releases/download/v.1.7.17/ossutil-v1.7.17-linux-amd64.zip
+          unzip ossutil-v1.7.17-linux-amd64.zip && cp ./ossutil-v1.7.17-linux-amd64/ossutil ${{github.workspace}}/ && chmod +x ${{github.workspace}}/ossutil
+
+      - name: Test ossutil cli is ok
+        run: |
+          ${{github.workspace}}/ossutil --version
+
       - uses: actions/setup-node@v3
         with:
           node-version: 16
@@ -24,20 +31,10 @@ jobs:
         run: yarn
 
       - name: build release env dist file
-        run: yarn build:release
-
-      - name: upload dist to bj
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.FE_S3_OPEN_STATIC_PROD_BJ_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.FE_S3_OPEN_STATIC_PROD_BJ_ACCESS_KEY_SECRET }}
         run: |
-          aws --region=${{ secrets.PROD_BJ_AWS_DEFAULT_REGION }} s3 sync ./dist s3://${{ secrets.FE_S3_OPEN_STATIC_PROD_BJ_BUCKET }}/whale-api-docs/ --exclude "*.map" --exclude "*.html" --exclude "*.xml" --cache-control max-age=31536000
-          aws --region=${{ secrets.PROD_BJ_AWS_DEFAULT_REGION }} s3 sync ./dist s3://${{ secrets.FE_S3_OPEN_STATIC_PROD_BJ_BUCKET }}/whale-api-docs/ --exclude "*" --include "*.html" --include "*.xml" --cache-control no-cache
+          yarn build:release
 
-      - name: upload dist to hk
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.FE_S3_OPEN_STATIC_PROD_HK_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.FE_S3_OPEN_STATIC_PROD_HK_ACCESS_KEY_SECRET }}
+      - name: upload release dist to oss
         run: |
-          aws --region=${{ secrets.PROD_HK_AWS_DEFAULT_REGION }} s3 sync ./dist s3://${{ secrets.FE_S3_OPEN_STATIC_PROD_HK_BUCKET }}/whale-api-docs/ --exclude "*.map" --exclude "*.html" --exclude "*.xml" --cache-control max-age=31536000
-          aws --region=${{ secrets.PROD_HK_AWS_DEFAULT_REGION }} s3 sync ./dist s3://${{ secrets.FE_S3_OPEN_STATIC_PROD_HK_BUCKET }}/whale-api-docs/  --exclude "*" --include "*.html" --include "*.xml" --cache-control no-cache
+          ${{github.workspace}}/ossutil cp dist/ oss://lb-assets/github/release/longbridgewhale.com/api/ -u -r -j 10 -e oss-cn-hangzhou.aliyuncs.com -i ${{ secrets.FE_LB_ASSET_ACCESS_KEY_ID }} -k ${{ secrets.FE_LB_ASSET_ACCESS_KEY_SECRET }} --exclude "*.html" --meta=Cache-Control:max-age=31536000
+          ${{github.workspace}}/ossutil cp dist/ oss://lb-assets/github/release/longbridgewhale.com/api/ -u -r -j 10 -e oss-cn-hangzhou.aliyuncs.com -i ${{ secrets.FE_LB_ASSET_ACCESS_KEY_ID }} -k ${{ secrets.FE_LB_ASSET_ACCESS_KEY_SECRET }} --include "*.html" --meta=Cache-Control:no-cache
