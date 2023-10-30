@@ -1,0 +1,38 @@
+swagger: "2.0"
+info:
+  description: "修改个人信息"
+  version: "v1"
+  title: "修改个人信息"
+paths:
+  /v1/content/profile/:id:
+    put:
+      access:
+      parameters:
+        - name: "nickname"
+          type: "string"
+          in: body
+          description: "昵称"
+          required: true
+        - name: "avatar"
+          type: "string"
+          in: body
+          description: "头像"
+          required: true
+        - name: "description"
+          type: "string"
+          in: body
+          description: "个人简介"
+          required: true
+      responses:
+        "200":
+          description: "返回成功"
+        "404":
+          description: "用户不存在"
+        "500":
+          description: "内部错误"
+      response_body: {
+          "code": 0,
+          "data": {
+            "success": true
+          }
+        }

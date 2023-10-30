@@ -1,0 +1,112 @@
+swagger: "2.0"
+info:
+  description: "获取个人信息"
+  version: "v1"
+  title: "获取个人信息"
+paths:
+  /v1/content/profile/:id:
+    get:
+      access:
+      parameters:
+        - name: "id"
+          type: "integer"
+          in: query
+          description: "用户 ID，例如 `123`"
+          required: true
+      responses:
+        "200":
+          description: "返回成功"
+          schema:
+            $ref: "#/definitions/get_profile_resp"
+        "404":
+          description: "用户不存在"
+        "500":
+          description: "内部错误"
+      response_body: {
+          "code": 0,
+          "data": {
+            "profile": {
+
+            },
+            "opened": true,
+            "ip_region": "CN"
+          }
+        }
+definitions:
+  get_profile_resp:
+    required: ["opened", "ip_region"]
+    properties:
+      opened:
+        type: boolean
+        description: "是否已经开通社区协议"
+        required: true
+      ip_region:
+        type: "string"
+        description: "当前用户的 IP 地区。<br /> 使用 [iso-3316](https://dev.maxmind.com/geoip/legacy/codes?lang=en#iso-3166-country-codes-with-associated-continent)"
+      profile:
+        type: "object"
+        properties:
+          id:
+            type: "int"
+            description: Profile Id
+            required: true
+          member_id:
+            type: "int"
+            description: 用户 Id
+            required: true
+          avatar:
+            type: "string"
+            description: "头像"
+            required: true
+          nickname:
+            type: "string"
+            description: "昵称"
+            required: true
+          status:
+            type: "int"
+            description: "状态"
+            required: true
+          description:
+            type: "string"
+            description: 个人简介
+            required: true
+          following_count:
+            type: "int"
+            description: 关注数量
+            required: true
+          followers_count:
+            type: "int"
+            description: 粉丝数量
+            required: true
+          activities_count:
+            type: "int"
+            description: 动态数量
+            required: true
+          bookmarks_count:
+            type: "int"
+            description: 收藏数量
+            required: true
+          cover:
+            type: "string"
+            description: 个人封面
+            required: true
+          scopes:
+            type: "object"
+            description: "与当前用户的可见范围"
+            required: true
+            properties:
+              followed:
+                type: "bool"
+                description: 当前用户关注了该用户
+              following:
+                type: "bool"
+                description: 该用户关注了当前用户
+              self:
+                type: "bool"
+                description: 当前用户就是该用户
+              blocked:
+                type: "bool"
+                description: 当前用户屏蔽了该用户
+              special_following:
+                type: "bool"
+                description: 当前用户特别关注了该用户
