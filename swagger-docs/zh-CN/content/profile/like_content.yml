@@ -1,0 +1,42 @@
+swagger: "2.0"
+info:
+  description: "点赞/取消点赞"
+  version: "v1"
+  title: "点赞/取消点赞"
+paths:
+  /v1/content/toggle_like:
+    post:
+      access:
+      parameters:
+        - name: "target_type"
+          type: "string"
+          in: body
+          description: "内容类型，可选：Topic(讨论)、Comment(评论)、Post(资讯)，例如 `Post`"
+          required: true
+        - name: "target_id"
+          type: "integer"
+          in: body
+          description: "内容 ID，例如 `123`"
+          required: true
+      responses:
+        "200":
+          description: "返回成功"
+          schema:
+            $ref: "#/definitions/toggle_like_resp"
+        "404":
+          description: "内容不存在"
+        "500":
+          description: "内部错误"
+      response_body: { "code": 0, "data": { "count": 123, "is_like": true } }
+definitions:
+  toggle_like_resp:
+    required: ["count", "is_like"]
+    properties:
+      count:
+        type: "integer"
+        description: "当前内容的点赞数量"
+        required: true
+      is_like:
+        type: "bool"
+        description: "当前内容是否已点赞"
+      profile:

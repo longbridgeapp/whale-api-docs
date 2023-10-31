@@ -1,0 +1,47 @@
+swagger: "2.0"
+info:
+  description: "收藏/取消收藏"
+  version: "v1"
+  title: "收藏/取消收藏"
+paths:
+  /v1/content/toggle_star:
+    post:
+      access:
+      parameters:
+        - name: "target_type"
+          type: "string"
+          in: body
+          description: "内容类别，可选：Topic(讨论)、Post(资讯)，例如 `Topic`"
+          required: true
+        - name: "target_id"
+          type: "integer"
+          in: body
+          description: "内容 ID，例如：`123`"
+          required: true
+        - name: "cancel"
+          type: "bool"
+          in: body
+          description: "是否取消收藏，true(取消收藏)、false(收藏)，例如：`true`"
+          required: true
+      responses:
+        "200":
+          description: "返回成功"
+          schema:
+            $ref: "#/definitions/toggle_star_resp"
+        "404":
+          description: "内容不存在"
+        "500":
+          description: "内部错误"
+      response_body: { "code": 0, "data": { "count": 123, "is_star": true } }
+definitions:
+  toggle_star_resp:
+    required: ["count", "is_star"]
+    properties:
+      count:
+        type: "integer"
+        description: "当前内容的收藏数量"
+        required: true
+      is_star:
+        type: "bool"
+        description: "当前内容是否已收藏"
+      profile:
