@@ -37,4 +37,5 @@ jobs:
       - name: upload canary dist to oss
         run: |
           ${{github.workspace}}/ossutil cp dist/ oss://lb-assets/github/canary/longbridgewhale.com/api/ -u -r -j 10 -e oss-cn-hangzhou.aliyuncs.com -i ${{ secrets.FE_LB_ASSET_ACCESS_KEY_ID }} -k ${{ secrets.FE_LB_ASSET_ACCESS_KEY_SECRET }} --exclude "*.html" --meta=Cache-Control:max-age=31536000
+          ${{github.workspace}}/ossutil cp dist/zh-CN/assets/ oss://lb-assets/github/canary/longbridgewhale.com/api/assets/ -u -r -j 10 -e oss-cn-hangzhou.aliyuncs.com -i ${{ secrets.FE_LB_ASSET_ACCESS_KEY_ID }} -k ${{ secrets.FE_LB_ASSET_ACCESS_KEY_SECRET }} --exclude "*.html" --meta=Cache-Control:max-age=31536000
           ${{github.workspace}}/ossutil cp dist/ oss://lb-assets/github/canary/longbridgewhale.com/api/ -u -r -j 10 -e oss-cn-hangzhou.aliyuncs.com -i ${{ secrets.FE_LB_ASSET_ACCESS_KEY_ID }} -k ${{ secrets.FE_LB_ASSET_ACCESS_KEY_SECRET }} --include "*.html" --meta=Cache-Control:no-cache
