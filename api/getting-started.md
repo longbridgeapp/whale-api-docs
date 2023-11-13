@@ -10,17 +10,7 @@ import TabItem from '@theme/TabItem';
 
 ## 前言
 
-[LongPort OpenAPI SDK](https://github.com/longbridgeapp/openapi-sdk) 基于 Rust 底层提供标准实现，目前我们已经发布了 Python、Node.js、Rust、C++ 的 SDK，其他语言的支持后面会陆续推出。
-
-## API Host
-
-- HTTP API - `https://openapi.longportapp.com`
-- WebSocket Quote - `wss://openapi-quote.longportapp.com`
-- WebSocket Trade - `wss://openapi-trade.longportapp.com`
-
-:::info
-中国大陆地区访问，建议采用 `openapi.longportapp.cn`, `openapi-quote.longportapp.cn`, `openapi-trade.longportapp.cn` 以提升访问速度。
-:::
+[Whale API SDK](https://github.com/longbridgeapp/openapi-sdk) 基于 Rust 底层提供标准实现，目前我们已经发布了 Python、Node.js、Rust、C++、[Golang](https://github.com/longbridgeapp/openapi-go) 的 SDK，其他语言的支持后面会陆续推出。
 
 ## 环境需求
 
@@ -29,7 +19,7 @@ import TabItem from '@theme/TabItem';
     <li><a href="https://www.python.org/">Python 3</a></li>
     <li>Pip</li>
   </TabItem>
-  <TabItem value="javascript" label="JavaScript">
+  <TabItem value="javascript" label="NodeJS">
     <li><a href="https://nodejs.org/">Node.js</a></li>
     <li>Yarn</li>
   </TabItem>
@@ -39,6 +29,9 @@ import TabItem from '@theme/TabItem';
   <TabItem value="java" label="Java">
     <li><a href="https://openjdk.org/">JDK</a></li>
     <li><a href="https://maven.apache.org/">Maven</a></li>
+  </TabItem>
+    <TabItem value="golang" label="Go">
+    <li><a href="https://go.dev/">Golang</a></li>
   </TabItem>
 </Tabs>
 
@@ -52,7 +45,7 @@ pip3 install longbridge
 ```
 
   </TabItem>
-  <TabItem value="javascript" label="JavaScript">
+  <TabItem value="javascript" label="NodeJS">
 
 ```bash
 yarn install longbridge
@@ -81,52 +74,221 @@ tokio = { version = "1", features = "rt-multi-thread" }
 ```
 
   </TabItem>
+  <TabItem value="golang" label="Go">
+
+```shell
+go get github.com/longbridgeapp/openapi-go
+```
+
+  </TabItem>
+
 </Tabs>
 
 下面我们以获取资产为例，演示一下如何使用 SDK。
 
-## 配置开发者账户
+## 获取 Access Token
 
-1. 下载 [LongPort](https://longportapp.com/download)，并完成开户
-2. 完成 Python 3 环境安装，并安装 Pip
-3. 从 [LongPort OpenAPI](https://open.longportapp.com) 官网获取 ` App Key`, `App Secret`, `Access Token` 等信息。
+请联系商务来获取 Whale API 的测试 Access Token
 
-**_获取 App Key, App Secret, Access Token 等信息_**
+配置 Access Token 和请求 Endpoint 有两种方式：
 
-访问 [LongPort OpenAPI](https://open.longportapp.com) 网站，登录后，进入“个人中心”。
+- 代码里面构造配置对象
+- 环境变量
 
-在页面上会给出“应用凭证”凭证信息，我们拿到以后设置环境变量，便于后面开发使用方便。
+### 构造配置对象
 
-### macOS / Linux 环境下设置环境变量
+SDK 提供了配置的构造方法：
+
+<Tabs groupId="programming-language">
+  <TabItem value="python" label="Python" default>
+
+```python
+from longbridge.openapi import TradeContext, Config, HttpClient
+
+# get config fields from config file or env or some secret management system
+key = "xxx"
+secret = "xxx"
+token = "xxx"
+http_url = "https://openapi.longbridge.xyz"
+trade_url = "wss://openapi-trade.longbridge.xyz"
+
+conf = Config(app_key = key, app_secret = secret, access_token = token, http_url = http_url, trade_ws_url = trade_url)
+http_cli = HttpClient(app_key = conf.app_key, app_secret = conf.app_secret, http_url = conf.http_url)
+ctx = TradeContext(conf)
+```
+
+  </TabItem>
+  <TabItem value="javascript" label="NodeJS" default>
+
+```javascript
+import { Config, HttpClient, TradeContext } from 'longbridge'
+
+const conf = new Config({
+    appKey: 'xxx',
+    appSecret: 'xxx',
+    accessToken: 'xxx',
+    httpUrl: 'https://openapi.longbridge.xyz',
+    tradeWsUrl: 'wss://openapi-trade.longbridge.xyz'
+})
+
+const httpClient = new HttpClient(conf.httpUrl, conf.appKey, conf.appSecret, conf.accessToken)
+
+try {
+    const ctx = TradeContext.new(conf)
+} catch (e) {
+    ...
+}
+```
+
+</TabItem>
+  <TabItem value="rust" label="Rust" default>
+
+```rust
+use std::sync::Arc;
+use serde_json::json;
+
+use longbridge::trade::{TradeContext};
+use longbridge::{httpclient::HttpClient, Config};
+
+# [tokio::main]
+
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let conf = Config::new("appKey", "appSecret", "accessToken")
+        .http_url("https://openapi.longbridge.xyz")
+        .trade_ws_url("wss://openapi-trade.longbridge-xyz");
+    let http_cli = conf.create_http_client();
+
+    let (ctx, receiver) = TradeContext::try_new(Arc::new(conf)).await?;
+    // do sth
+    Ok(());
+}
+
+```
+
+  </TabItem>
+  <TabItem value="java" label="Java" default>
+
+```java
+import com.longbridge.*;
+import com.longbridge.trade.*;
+
+class Main {
+    public static void main(String[] args) throws Exception {
+        try (
+            Config config = new ConfigBuilder("appkey", "appsecret", "accessToken")
+                .HttpUrl("https://openapi.longbridge.xyz")
+                .tradeWebsocketUrl("wss://openapi-trade.longbridge.xyz")
+                .build();
+            TradeContext ctx = TradeContext.create(config).get(); 
+            HttpClient cli = new HttpClient("https://openapi.longbridge.xyz", "appkey", "appsecret", "accesstoken");
+        ) {
+            ctx.subscribe(new TopicType[] { TopicType.Private});
+            ctx.setOnOrderChange((PushOrderChanged orderEvent) -> {
+                logger.info("receive order change event: {}", orderEvent);
+            });
+            // do sth
+        }
+    }
+}
+```
+
+  </TabItem>
+  <TabItem value="golang" label="Go" default>
+
+```go
+package main
+
+import (
+    "context"
+    "log"
+    "time"
+    "encoding/json"
+
+    "github.com/longbridgeapp/openapi-go/config"
+    "github.com/longbridgeapp/openapi-go/http"
+    "github.com/longbridgeapp/openapi-go/trade"
+)
+
+
+func main() {
+    
+    conf := Config{
+        HttpURL: "https://openapi.longbridge.xyz",
+        AppKey: "appkey",
+        AppSecret: "appsecret",
+        AccessToken: "accesstoken",
+        TradeUrl: "wss://openapi-trade.longbridge.xyz",
+    }
+
+    tctx, err := trade.NewFromCfg(conf)
+
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    httpcli, err := http.NewFromCfg(conf)
+    if err != nil {
+        log.Fatal(err)
+    }
+}
+
+```
+
+  </TabItem>
+
+</Tabs>
+
+### 环境变量
+
+环境变量说明
+
+| 环境变量| 说明 | 例子 |
+|---------------- | --------------- | :--------------- |
+| LONGBRIDGE_APP_KEY    | access key   | access_key |
+| LONGBRIDGE_APP_SECRET    | access secret key    |  access_secret_key |
+| LONGBRIDGE_ACCESS_TOKEN | access token | tn_xxx |
+| LONGBRIDGE_HTTP_URL | API Endpoint | <https://openapi.longbridge.xyz> |
+| LONGBRIDGE_TRADE_WS_URL | Websocket Endpoint | wss://openapi-trade.longbridge.xyz |
+
+#### macOS / Linux 环境下设置环境变量
 
 打开终端，输入下面的命令即可：
 
 ```bash
-$ export LONGBRIDGE_APP_KEY="从页面上获取到的 App Key"
-$ export LONGBRIDGE_APP_SECRET="从页面上获取到的 App Secret"
-$ export LONGBRIDGE_ACCESS_TOKEN="从页面上获取到的 Access Token"
+export LONGBRIDGE_APP_KEY="获取到的 Access Key"
+export LONGBRIDGE_APP_SECRET="获取到 的 Access Secret Key"
+export LONGBRIDGE_ACCESS_TOKEN="获取到的 Access Token"
+export LONGBRIDGE_HTTP_URL="https://openapi.longbridge.xyz" # 测试 Whale API
+export LONGBRIDGE_TRADE_WS_URL="wss://openapi-trade.longbridge.xyz" # 测试 Whale API Websocket
 ```
 
-### Windows 下设置环境变量
+#### Windows 下设置环境变量
 
 Windows 要稍微复杂一些，按下 `Win + R` 快捷键，输入 `cmd` 命令启动命令行（建议使用 [Windows Terminal](https://apps.microsoft.com/store/detail/windows-terminal/9N0DX20HK701) 获得更好的开发体验）。
 
 在命令行里面输入下面的命令设置环境变量：
 
 ```bash
-C:\Users\jason> setx LONGBRIDGE_APP_KEY "从页面上获取到的 App Key"
+C:\Users\jason> setx LONGBRIDGE_APP_KEY "获取到的 App Key"
 成功：指定的值已得到保存。
 
-C:\Users\jason> setx LONGBRIDGE_APP_SECRET "从页面上获取到的 App Secret"
+C:\Users\jason> setx LONGBRIDGE_APP_SECRET "获取到的 App Secret"
 成功：指定的值已得到保存。
 
-C:\Users\jason> setx LONGBRIDGE_ACCESS_TOKEN "从页面上获取到的 Access Token"
+C:\Users\jason> setx LONGBRIDGE_ACCESS_TOKEN "获取到的 Access Token"
 成功：指定的值已得到保存。
+
+C:\Users\jason> setx LONGBRIDGE_HTTP_URL "https://openapi.longbridge.xyz"
+成功：指定的值已得到保存。
+
+C:\Users\jason> setx LONGBRIDGE_TRADE_WS_URL "https://openapi-trade.longbridge.xyz"
+成功：指定的值已得到保存。
+
 ```
 
 :::caution
 
-Windows 环境变量限制，当上面 3 条命令执行成功以后，你需要重新启动 Windows 或者注销后重新登录一次，才可以读取到。
+Windows 环境变量限制，当上面命令都执行成功以后，你需要重新启动 Windows 或者注销后重新登录一次，才可以读取到。
 
 :::
 
@@ -137,67 +299,99 @@ C:\Users\jason> set LONGBRIDGE
 LONGBRIDGE_APP_KEY=xxxxxxx
 LONGBRIDGE_APP_SECRET=xxxxxx
 LONGBRIDGE_ACCESS_TOKEN=xxxxxxx
+LONGBRIDGE_HTTP_URL=https://openapi.longbridge.xyz
+LONGBRIDGE_TRADE_WS_URL=https://openapi-trade.longbridge.xyz
 ```
 
 如果能正确打印你刚才设置的值，那么环境变量就是对了。
 
 :::tip
-建议您设置好 `LONGBRIDGE_APP_KEY`, `LONGBRIDGE_APP_SECRET`, `LONGBRIDGE_ACCESS_TOKEN` 这几个环境变量。我们为了演示方便，后面各章节文档中的示例代码都会使用这几个环境变量。
+建议您设置好 `LONGBRIDGE_APP_KEY`, `LONGBRIDGE_APP_SECRET`, `LONGBRIDGE_ACCESS_TOKEN`, `LONGBRIDGE_HTTP_URL`, `LONGBRIDGE_TRADE_WS_URL` 这几个环境变量。我们为了演示方便，后面各章节文档中的示例代码都会使用这几个环境变量。
 
 如您在 Windows 环境不方便使用环境变量，可根据个人需要，修改代码。
 :::
 
-:::caution
-请注意保护好您的 **Access Token** 信息，任何人获得到它，都可以通过 OpenAPI 来交易你的账户！
-:::
+## 调用例子
 
-## 场景示范
+### 下单
 
-### 获取资产总览
+我们下单通过 HTTP Client 调用 HTTP API，通过通过 Websocket 订阅订单的状态变更。
 
 <Tabs groupId="programming-language">
   <TabItem value="python" label="Python" default>
 
-创建 `account_asset.py` 贴入下面的代码：
+创建 `whale.py` 贴入下面的代码：
 
 ```python
-from longbridge.openapi import TradeContext, Config
+from longbridge.openapi import TradeContext, Config, HttpClient, PushOrderChanged
 
 config = Config.from_env()
+httpcli = HttpClient.from_env()
 ctx = TradeContext(config)
 
-resp = ctx.account_balance()
-print(resp)
+ctx.subscribe(["private"])
+
+
+def on_order_changed(event: PushOrderChanged):
+    print()
+
+ctx.set_on_order_changed(on_order_changed)
+
+resp = httpcli.request("POST", "/v1/whaleapi/trade/order", {
+    "symbol": "TSLA",
+    "side": "Buy",
+    "order_type": "MO",
+    "submitted_quantity": "20",
+    "time_in_force": "Day",
+    "account_no": "L6VQEU00121996"
+})
+
 ```
 
 运行
 
 ```bash
-python account_asset.py
+python whale.py
 ```
 
   </TabItem>
-  <TabItem value="javascript" label="JavaScript">
+  <TabItem value="javascript" label="NodeJS">
 
-创建 `account_asset.js` 贴入下面的代码：
+创建 `whale.js` 贴入下面的代码：
 
 ```js
-const { Config, TradeContext } = require('longbridge')
+import { Config, TradeContext, HttpClient, TopicType } from 'longbridge'
 
-let config = Config.fromEnv()
-TradeContext.new(config)
-  .then((ctx) => ctx.accountBalance())
-  .then((resp) => {
-    for (let obj of resp) {
-      console.log(obj.toString())
-    }
+const config = Config.fromEnv()
+const httpcli = HttpClient.fromEnv()
+
+try {
+  const ctx = await TradeContext.new(config)
+  ctx.subscribe([TopicType.Private])
+  ctx.setOnOrderChanged((event) => {
+    // handle order changed event
+    console.dir(event)
   })
+    
+  const resp = await httpcli.request("POST", "/v1/whaleapi/trade/order", {
+    "symbol": "TSLA",
+    "side": "Buy",
+    "order_type": "MO",
+    "submitted_quantity": "20",
+    "time_in_force": "Day",
+    "account_no": "L6VQEU00121996"
+  })
+
+} catch(e) {
+  // handle error
+}
+
 ```
 
 运行
 
 ```bash
-node account_asset.js
+node whale.js
 ```
 
   </TabItem>
@@ -207,185 +401,37 @@ node account_asset.js
 
 ```rust
 use std::sync::Arc;
+use serde_json::json;
 
-use longbridge::{trade::TradeContext, Config};
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let config = Arc::new(Config::from_env()?);
-    let (ctx, _) = TradeContext::try_new(config).await?;
-
-    let resp = ctx.account_balance().await?;
-    println!("{:?}", resp);
-    Ok(())
-}
-```
-
-运行
-
-```bash
-cargo run
-```
-
-  </TabItem>
-  <TabItem value="java" label="Java">
-
-创建 `Main.java` 贴入下面的代码：
-
-```java
-import com.longbridge.*;
-import com.longbridge.trade.*;
-
-class Main {
-    public static void main(String[] args) throws Exception {
-        try (Config config = Config.fromEnv(); TradeContext ctx = TradeContext.create(config).get()) {
-            for (AccountBalance obj : ctx.getAccountBalance().get()) {
-                System.out.println(obj);
-            }
-        }
-    }
-}
-```
-
-运行
-
-```bash
-mvn compile exec:exec
-```
-
-  </TabItem>
-</Tabs>
-
-运行后，会输出如下：
-
-```
-[
-  AccountBalance {
-    total_cash: 503898884.81,
-    max_finance_amount: 0.00,
-    remaining_finance_amount: 501403229.49,
-    risk_level: Some(1),
-    margin_call: 0,
-    currency: "HKD",
-    cash_infos: [
-      CashInfo {
-        withdraw_cash: 501214985.15,
-        available_cash: 501214985.15,
-        frozen_cash: 584438.25,
-        settling_cash: -3897793.90,
-        currency: "HKD",
-      },
-      CashInfo {
-        withdraw_cash: -25546.89,
-        available_cash: -25546.89,
-        frozen_cash: 295768.57,
-        settling_cash: 2326.60,
-        currency: "USD",
-      }
-    ]
-  }
-]
-```
-
-### 订阅实时行情
-
-订阅行情数据请检查 [开发者中心](https://open.longportapp.com/account) - “行情权限”是否正确
-
-- 港股 - BMP 基础报价，无实时行情推送，无法用 WebSocket 订阅
-- 美股 - LV1 纳斯达克最优报价 (只限 Open API）
-
-运行前访问 [开发者中心](https://open.longportapp.com/account)，检查确保账户有正确的行情权限。
-
-:::info
-
-如没有开通行情权限，可以通过“LongPort”手机客户端，并进入“我的 - 我的行情 - 行情商城”购买开通行情权限。
-
-https://longportapp.com/download
-:::
-
-当你有正确的行情权限，看起来可能会是这样：
-
-<img src="https://pub.lbkrs.com/files/202205/JjCceNDSqeBJpaWv/SCR-20220507-rnm.png" className="max-w-2xl" />
-
-<Tabs groupId="programming-language">
-  <TabItem value="python" label="Python" default>
-
-创建 `subscribe_quote.py` 贴入下面的代码：
-
-```python
-from time import sleep
-from longbridge.openapi import QuoteContext, Config, SubType, PushQuote
-
-
-def on_quote(symbol: str, quote: PushQuote):
-    print(symbol, quote)
-
-
-config = Config.from_env()
-ctx = QuoteContext(config)
-ctx.set_on_quote(on_quote)
-
-symbols = ["700.HK", "AAPL.US", "TSLA.US", "NFLX.US"]
-ctx.subscribe(symbols, [SubType.Quote], True)
-sleep(30)
-```
-
-运行
-
-```bash
-python subscribe_quote.py
-```
-
-  </TabItem>
-  <TabItem value="javascript" label="JavaScript">
-
-创建 `subscribe_quote.js` 贴入下面的代码：
-
-```javascript
-const { Config, QuoteContext, SubType } = require('longbridge')
-
-let config = Config.fromEnv()
-QuoteContext.new(config).then((ctx) => {
-  ctx.setOnQuote((_, event) => console.log(event.toString()))
-  ctx.subscribe(['700.HK', 'AAPL.US', 'TSLA.US', 'NFLX.US'], [SubType.Quote], true)
-})
-```
-
-运行
-
-```bash
-node subscribe_quote.js
-```
-
-  </TabItem>
-  <TabItem value="rust" label="Rust">
-
-创建 `main.rs` 贴入下面的代码：
-
-```rust
-use std::sync::Arc;
-
-use longbridge::{
-    quote::{QuoteContext, SubFlags},
-    Config,
-};
+use longbridge::trade::{TradeContext, TopicType};
+use longbridge::{httpclient::HttpClient, Config};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = Arc::new(Config::from_env()?);
-    let (ctx, mut receiver) = QuoteContext::try_new(config).await?;
+    let httpcli = HttpClient::from_env()?;
+    let (ctx, receiver) = TradeContext::try_new(config).await?;
+    ctx.subscribe([TopicType.Private]).await?;
 
-    ctx.subscribe(
-        ["700.HK", "AAPL.US", "TSLA.US", "NFLX.US"],
-        SubFlags::QUOTE,
-        true,
-    )
-    .await?;
+    let resp = httpcli.request("POST".parse()?, "/v1/whaleapi/trade/order")
+        .body(json!{
+            "symbol": "TSLA",
+            "side": "Buy",
+            "order_type": "MO",
+            "submitted_quantity": "20",
+            "time_in_force": "Day",
+            "account_no": "L6VQEU00121996"
+        })
+        .response::<String>()
+        .send()
+        .await?;
+    println!("{}", resp);
 
     while let Some(event) = receiver.recv().await {
         println!("{:?}", event);
     }
-    Ok(())
+
+    Ok(());
 }
 ```
 
@@ -402,16 +448,29 @@ cargo run
 
 ```java
 import com.longbridge.*;
-import com.longbridge.quote.*;
+import com.longbridge.trade.*;
 
 class Main {
     public static void main(String[] args) throws Exception {
-        try (Config config = Config.fromEnv(); QuoteContext ctx = QuoteContext.create(config).get()) {
-            ctx.setOnQuote((symbol, quote) -> {
-                System.out.printf("%s\t%s\n", symbol, quote);
+        try (
+            Config config = Config.fromEnv(); 
+            TradeContext ctx = TradeContext.create(config).get(); 
+            HttpClient cli = HttpClient.fromEnv()
+        ) {
+            ctx.subscribe(new TopicType[] { TopicType.Private});
+            ctx.setOnOrderChange((PushOrderChanged orderEvent) -> {
+                logger.info("receive order change event: {}", orderEvent);
             });
-            ctx.subscribe(new String[] { "700.HK", "AAPL.US", "TSLA.US", "NFLX.US" }, SubFlags.Quote, true).get();
-            Thread.sleep(30000);
+
+            HashMap<String, Object> req = new HashMap<String, Object>();
+            req.put("symbol", "TSLA.US");
+            req.put("order_type", "MO"); // Market Order
+            req.put("side", "Buy");
+            req.put("submitted_quantity", "20");
+            req.put("time_in_force", "Day");
+            req.put("account_no", "L6VQEU00121996"); // Test Account Number
+
+            HashMap<String, Object> submitRes = cli.request(HashMap.class, "POST", "/v1/whaleapi/trade/order", req).get();
         }
     }
 }
@@ -424,344 +483,92 @@ mvn compile exec:exec
 ```
 
   </TabItem>
-</Tabs>
+  <TabItem value="golang" label="Go">
 
-运行后，会输出如下：
+创建 whale 目录，执行
 
-```
-700.HK PushQuote {
-    last_done: 367.000,
-    open: 362.000,
-    high: 369.400,
-    low: 356.000,
-    timestamp: "2022-06-06T08:10:00Z",
-    volume: 22377421,
-    turnover: 8081883405.000,
-    trade_status: Normal,
-    trade_session: Normal
-}
-AAPL.US PushQuote {
-  last_done: 147.350,
-  open: 150.700,
-  high: 151.000,
-  low: 146.190,
-  timestamp: "2022-06-06T11:57:36Z",
-  volume: 3724407,
-  turnover: 550606662.815,
-  trade_status: Normal,
-  trade_session: Pre
-}
-NFLX.US PushQuote {
-  last_done: 201.250,
-  open: 205.990,
-  high: 205.990,
-  low: 200.110,
-  timestamp: "2022-06-06T11:57:26Z",
-  volume: 137821,
-  turnover: 27888085.590,
-  trade_status: Normal,
-  trade_session: Pre
-}
+```shell
+cd whale
+go mod init whale
+go get github.com/longbridgeapp/openapi-go
 ```
 
-### 委托下单
+创建 `main.go`，贴入一下内容：
 
-下面我们做一次 [委托下单](https://open.longportapp.com/docs/trade/order/submit) 动作，我们假设要以 50 HKD 买入 `700.HK` 的数量为 `100`。
+```go
+package main
 
-> NOTE: 为了防止测试买入成功，这里演示给了一个较低的价格，避免成交。OpenAPI 操作均等同与线上交易，请谨慎操作，开发调试注意参数细节。
+import (
+    "context"
+    "log"
+    "time"
+    "encoding/json"
 
-<Tabs groupId="programming-language">
-  <TabItem value="python" label="Python" default>
-
-创建 `submit_order.py` 贴入下面的代码：
-
-```python
-from decimal import Decimal
-from longbridge.openapi import TradeContext, Config, OrderSide, OrderType, TimeInForceType
-
-config = Config.from_env()
-ctx = TradeContext(config)
-
-resp = ctx.submit_order(
-    side=OrderSide.Buy,
-    symbol="700.HK",
-    order_type=OrderType.LO,
-    submitted_price=Decimal("50"),
-    submitted_quantity=200,
-    time_in_force=TimeInForceType.Day,
-    remark="Hello from Python SDK",
+    "github.com/longbridgeapp/openapi-go/config"
+    "github.com/longbridgeapp/openapi-go/http"
+    "github.com/longbridgeapp/openapi-go/trade"
 )
-print(resp)
-```
 
-运行
 
-```bash
-python submit_order.py
-```
+func main() {
+    conf, err := config.NewFromEnv()
 
-  </TabItem>
-  <TabItem value="javascript" label="JavaScript">
+    if err != nil {
+        log.Fatal(err)
+    }
 
-创建 `submit_order.js` 贴入下面的代码：
+    tctx, err := trade.NewFromCfg(cfg)
 
-```javascript
-const { Config, TradeContext, OrderType, OrderSide, Decimal, TimeInForceType } = require('longbridge')
+    if err != nil {
+        log.Fatal(err)
+    }
 
-let config = Config.fromEnv()
-TradeContext.new(config)
-  .then((ctx) =>
-    ctx.submitOrder({
-      symbol: '700.HK',
-      orderType: OrderType.LO,
-      side: OrderSide.Buy,
-      timeInForce: TimeInForceType.Day,
-      submittedQuantity: 200,
-      submittedPrice: new Decimal('300'),
+    httpcli, err := http.NewFromCfg(cfg)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    if _, err = tctx.Subscribe(context.Background(), []string{"private"}); err != nil {
+        log.Fatal(err)
+    }
+
+    tctx.OnTrade(func(ev *trade.PushEvent) {
+        log.Printf("got event: %+v\n", ev.Data)
     })
-  )
-  .then((resp) => console.log(resp.toString()))
-```
 
-运行
-
-```bash
-node submit_order.js
-```
-
-  </TabItem>
-  <TabItem value="rust" label="Rust">
-
-创建 `main.rs` 贴入下面的代码：
-
-```rust
-use std::sync::Arc;
-
-use longbridge::{
-    decimal,
-    trade::{OrderSide, OrderType, SubmitOrderOptions, TimeInForceType, TradeContext},
-    Config,
-};
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let config = Arc::new(Config::from_env()?);
-    let (ctx, _) = TradeContext::try_new(config).await?;
-
-    let opts = SubmitOrderOptions::new(
-        "700.HK",
-        OrderType::LO,
-        OrderSide::Buy,
-        200,
-        TimeInForceType::Day,
-    )
-    .submitted_price(decimal!(50i32));
-    let resp = ctx.submit_order(opts).await?;
-    println!("{:?}", resp);
-    Ok(())
-}
-```
-
-运行
-
-```bash
-cargo run
-```
-
-  </TabItem>
-  <TabItem value="java" label="Java">
-
-创建 `Main.java` 贴入下面的代码：
-
-```java
-import com.longbridge.*;
-import com.longbridge.trade.*;
-import java.math.BigDecimal;
-
-public class Main {
-    public static void main(String[] args) throws Exception {
-        try (Config config = Config.fromEnv(); TradeContext ctx = TradeContext.create(config).get()) {
-            SubmitOrderOptions opts = new SubmitOrderOptions("700.HK",
-                    OrderType.LO,
-                    OrderSide.Buy,
-                    200,
-                    TimeInForceType.Day).setSubmittedPrice(new BigDecimal(50));
-            SubmitOrderResponse resp = ctx.submitOrder(opts).get();
-            System.out.println(resp);
-        }
+    var resp json.RawMessage
+    if err := httpcli.Call(context.Background(), "POST", "/v1/whaleapi/trade/order", nil, map[string]interface{
+        "symbol": "TSLA",
+        "side": "Buy",
+        "order_type": "MO",
+        "submitted_quantity": "20",
+        "time_in_force": "Day",
+        "account_no": "L6VQEU00121996",
+    }, &resp); err != nil {
+        log.Fatal(err)
     }
+
+    time.Sleep(time.Second * 5)
 }
 ```
 
 运行
 
-```bash
-mvn compile exec:exec
+```shell
+go run ./
+
 ```
 
   </TabItem>
+
 </Tabs>
 
-运行后，会输出如下：
-
-```
-SubmitOrderResponse { order_id: "718437534753550336" }
-```
-
-### 获取当日订单
-
-<Tabs groupId="programming-language">
-  <TabItem value="python" label="Python" default>
-
-创建 `today_orders.py` 贴入下面的代码：
-
-```python
-from longbridge.openapi import TradeContext, Config
-
-config = Config.from_env()
-ctx = TradeContext(config)
-
-resp = ctx.today_orders()
-print(resp)
-```
-
-运行
-
-```bash
-python today_orders.py
-```
-
-  </TabItem>
-  <TabItem value="javascript" label="JavaScript">
-
-创建 `today_orders.js` 贴入下面的代码：
-
-```js
-const { Config, TradeContext } = require('longbridge')
-
-let config = Config.fromEnv()
-TradeContext.new(config)
-  .then((ctx) => ctx.todayOrders())
-  .then((resp) => {
-    for (let obj of resp) {
-      console.log(obj.toString())
-    }
-  })
-```
-
-运行
-
-```bash
-node today_orders.js
-```
-
-  </TabItem>
-  <TabItem value="rust" label="Rust">
-
-创建 `main.rs` 贴入下面的代码：
-
-```rust
-use std::sync::Arc;
-
-use longbridge::{trade::TradeContext, Config};
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let config = Arc::new(Config::from_env()?);
-    let (ctx, _) = TradeContext::try_new(config).await?;
-
-    let resp = ctx.today_orders(None).await?;
-    for obj in resp {
-        println!("{:?}", obj);
-    }
-    Ok(())
-}
-```
-
-运行
-
-```bash
-cargo run
-```
-
-  </TabItem>
-  <TabItem value="java" label="Java">
-
-创建 `Main.java` 贴入下面的代码：
-
-```java
-import com.longbridge.*;
-import com.longbridge.trade.*;
-
-class Main {
-    public static void main(String[] args) throws Exception {
-        try (Config config = Config.fromEnv(); TradeContext ctx = TradeContext.create(config).get()) {
-            Order[] orders = ctx.getTodayOrders(null).get();
-            for (Order order : orders) {
-                System.out.println(order);
-            }
-        }
-    }
-}
-```
-
-运行
-
-```bash
-mvn compile exec:exec
-```
-
-  </TabItem>
-</Tabs>
-
-运行后，会输出如下：
-
-```
-Order {
-  order_id: "718437534753550336",
-  status: NotReported,
-  stock_name: "腾讯控股 1",
-  quantity: 200,
-  executed_quantity: None,
-  price: Some(50.000),
-  executed_price: None,
-  submitted_at: 2022-06-06T12:14:16Z,
-  side: Buy,
-  symbol: "700.HK",
-  order_type: LO,
-  last_done: None,
-  trigger_price: Some(0.000),
-  msg: "",
-  tag: Normal,
-  time_in_force: Day,
-  expire_date: Some(NaiveDate(Date { year: 2022, ordinal: 158 })),
-  updated_at: Some(2022-06-06T12:14:16Z),
-  trigger_at: None,
-  trailing_amount: None,
-  trailing_percent: None,
-  limit_offset: None,
-  trigger_status: None,
-  currency: "HKD",
-  outside_rth: nonce
-}
-```
-
-上面例子已经完整演示了如何使用 SDK 访问 OpenAPI 的接口，更多其他接口请详细阅读 [LongPort OpenAPI 文档](https://longbridgeapp.github.io/openapi-sdk/)，根据不同的接口使用。
-
-## 更多例子
-
-我们在 LongPort OpenAPI Python SDK 的 GitHub 仓库中提供了上面几个例子的完整代码，当然后期我们也会持续往里面补充或更新。
-
-https://github.com/longbridgeapp/openapi-sdk/tree/master/examples
+上面例子已经完整演示了如何使用 SDK 访问 Whale API 的接口。
 
 ## SDK API 文档
 
 SDK 的详细 API 文档请访问：
 
-https://longbridgeapp.github.io/openapi-sdk/
+<https://longbridgeapp.github.io/openapi-sdk/>
 
 ## 反馈及沟通
-
-- 可以给 LongPort 服务邮箱发送反馈，邮箱地址是：service@longbridge.global
-- 加入 LongPort OpenAPI 微信沟通群，二维码如下：
-  <img src="https://pub.lbkrs.com/files/202205/akTNrRTBrT5aMX4f/qrcode.jpg" className="max-w-2xl" />

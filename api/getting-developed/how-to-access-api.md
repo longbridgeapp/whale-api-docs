@@ -10,8 +10,6 @@ sidebar_position: 1
 | 注意事项                                     | 参考文档                                          |
 | -------------------------------------------- | ------------------------------------------------- |
 | 推荐使用各自语言的 SDK，而不是调用原生的接口 | [SDK 快速开始页面](../docs/getting-started)       |
-| 阅读 OpenAPI 介绍中开通相应服务              | [OpenAPI 如何开通](../docs/#如何开通)             |
-| 阅读 OpenAPI 介绍中使用权限及限制            | [OpenAPI 使用权限及限制](../docs/#使用权限及限制) |
 | 了解通用错误码，便于查找调用接口出错的原因   | [通用错误码](../docs/error-codes)                 |
 
 ## REST API 文档约定格式
@@ -57,27 +55,21 @@ GET 请求时默认所有参数为查询参数，非 GET 请求时默认所有�
 
 ## API 调用流程
 
-### 1. 开通服务
+### 1. 获取调用 Access Token
 
-参考 [OpenAPI 介绍](../docs/#如何开通) 开通相应服务。
+连接商务获取测试使用的 Access Token
 
-### 2. 获取 App Key 信息及 Access Token
-
-在 [开发者后台](https://open.longportapp.com/account) 中获取 **Access Token**， **App Key** 以及 **App Secret**。
-
-**Access Token** 的有效期是三个月，失效后可以在开发者后台重置。在失效之前，可以通过调用 [刷新 Access Token](./refresh-token-api) API 进行刷新。
-
-### 3. 生成签名
+### 2. 生成签名
 
 :::tip
 
-本页介绍的内容大部分，我们的 [OpenAPI SDK](/sdk) 已经完整实现了，你如果是 [SDK](/sdk) 用户，可以直接忽略签名认证部分。
+本页介绍的内容大部分，我们的 [SDK](/sdk) 已经完整实现了，你如果是 [SDK](/sdk) 用户，可以直接忽略签名认证部分。
 
 此部分内容是为了给非 SDK 用户提供参考。
 
 :::
 
-先根据相应的 API 文档构造请求后，通过 OpenAPI SDK 直接调用 API，SDK 会帮助生成签名，或者通过以下流程创建签名。
+先根据相应的 API 文档构造请求后，通过 SDK 直接调用 API，SDK 会帮助生成签名，或者通过以下流程创建签名。
 
 #### 添加 `X-Api-Key`、`X-Timestamp`、`Authorization`
 
@@ -132,14 +124,9 @@ headers['X-Api-Signature'] = sign(method, uri, headers, params, body, secret)
 
 ```
 
-### 4. 调用 API
+### 3. 调用 API
 
 使用 HTTP 客户端发送签名过后的请求。
-
-## 基本路径
-
-- HTTP API - `https://openapi.longportapp.com`
-- WebSocket - `wss://openapi-quote.longportapp.com`
 
 ## API Request
 
@@ -148,15 +135,15 @@ headers['X-Api-Signature'] = sign(method, uri, headers, params, body, secret)
 测试接口示例如下：
 
 ```bash
-curl -v https://openapi.longportapp.com/v1/test \
+curl -i -v https://openapi.longbridge.xyz/v1/test \
     -H "X-Api-Signature: {签名}" -H "X-Api-Key: {Appkey}" \
     -H "Authorization: {AccessToken}" -H "X-Timestamp: 1539095200.123"
 ```
 
-获取股票持仓接口是`GET`请求并需要传递参数，示例如下：
+获取账户资产信息是 `GET` 请求并需要传递参数，示例如下：
 
 ```bash
-curl -v https://openapi.longportapp.com/v1/asset/stock?symbol=700.HK&symbol=BABA.US \
+curl -i -v https://openapi.longbridge.xyz/v1/whaleapi/asset/detail_info?currency=HKD&account_no=xxx \
     -H "X-Api-Signature: {签名}" -H "X-Api-Key: {AppKey}" \
     -H "Authorization: {AccessToken}" -H "X-Timestamp: 1539095200.123"
 ```
@@ -164,8 +151,8 @@ curl -v https://openapi.longportapp.com/v1/asset/stock?symbol=700.HK&symbol=BABA
 委托下单接口是`POST`请求并需要传递`Body`参数，示例如下：
 
 ```bash
-curl -v -XPOST https://openapi.longportapp.com/v1/trade/order \
-    -d '{ "side": "Buy", symbol": "700.HK", "order_type": "LO", "submitted_price": "50", "submitted_quantity": "200", "time_in_force": "Day", remark": "Hello from Shell"}' \
+curl -i -v -X POST https://openapi.longportapp.com/v1/whaleapi/trade/order \
+    -d '{ "side": "Buy", symbol": "700.HK", "order_type": "LO", "submitted_price": "50", "submitted_quantity": "200", "time_in_force": "Day", "remark": "Hello from Shell", "account_no": "xxx"}' \
     -H "X-Api-Signature: {签名}" -H "X-Api-Key: {AppKey}" \
     -H "Authorization: {AccessToken}" -H "X-Timestamp: 1539095200.123"
     -H "Content-Type: application/json; charset=utf-8"
@@ -219,13 +206,13 @@ import hmac
 
 # request 请求信息
 # 请求方法
-method = "POST"
+method = "DELETE"
 # 请求路径
-uri = "/v1/trade/order/submit"
-# 请求参数 如 member_id=1&account_channel=2
+uri = "/v1/whalapi/trade/order"
+# url query params
 params = ""
 # 请求 body
-body = json.dumps({ "order_id": '683615454870679552' })
+body = json.dumps({ "order_id": '683615454870679552', "account_no": 'xxx' })
 # 请求头部信息
 headers = {}
 headers['X-Api-Key'] = '${app_key}'
@@ -255,7 +242,7 @@ def sign(method, uri, headers, params, body, secret):
 headers['X-Api-Signature'] = sign(method,  uri, headers, params, body, app_secret)
 
 # 请求接口
-response = requests.request(method, "https://openapi.longportapp.com" + uri + '?' + params, headers=headers, data=body)
+response = requests.request(method, "https://openapi.longbridge.xyz" + uri + '?' + params, headers=headers, data=body)
 
 print(response.text)
 
