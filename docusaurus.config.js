@@ -147,37 +147,37 @@ const config = {
               {
                 target: '_self',
                 html: '柜台系统 - 前中台',
-                href: '/front-desk',
+                href: 'https://longbridgewhale.com/front-desk',
               },
               {
                 target: '_self',
                 html: '柜台系统 - 后台',
-                href: '/backoffice',
+                href: 'https://longbridgewhale.com/backoffice',
               },
               {
                 target: '_self',
                 html: 'LongPort 社区',
-                href: '/longport',
+                href: 'https://longbridgewhale.com/longport',
               },
               {
                 target: '_self',
                 html: 'PortAI',
-                href: '/portai',
+                href: 'https://longbridgewhale.com/portai',
               },
               {
                 target: '_self',
                 html: '投放系统',
-                href: '/delivery-system',
+                href: 'https://longbridgewhale.com/delivery-system',
               },
               {
                 target: '_self',
                 html: '营销系统',
-                href: '/marketing',
+                href: 'https://longbridgewhale.com/marketing',
               },
               {
                 target: '_self',
                 html: '零售终端',
-                href: '/retail',
+                href: 'https://longbridgewhale.com/retail',
               },
             ],
           },
@@ -188,17 +188,17 @@ const config = {
               {
                 target: '_self',
                 html: '互联网 App + 解决方案',
-                href: '/solutions/app-plus',
+                href: 'https://longbridgewhale.com/solutions/app-plus',
               },
               {
                 target: '_self',
                 html: '证券柜台解决方案',
-                href: '/solutions/securities-market',
+                href: 'https://longbridgewhale.com/solutions/securities-market',
               },
               {
                 target: '_self',
                 html: '虚拟资产解决方案',
-                href: '/solutions/virtual-assets',
+                href: 'https://longbridgewhale.com/solutions/virtual-assets',
               },
             ],
           },
@@ -210,12 +210,12 @@ const config = {
           {
             html: '关于我们',
             target: '_self',
-            href: '/about',
+            href: 'https://longbridgewhale.com/about',
           },
           {
             html: '媒体报道',
             target: '_self',
-            href: '/whale-reports',
+            href: 'https://longbridgewhale.com/whale-reports',
           },
           {
             type: 'localeDropdown',
