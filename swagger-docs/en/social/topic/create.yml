@@ -1,0 +1,45 @@
+swagger: "2.0"
+info:
+  description: "This API is used to create social official content"
+  version: "v1"
+  title: "Create Social Official Content"
+paths:
+  /v1/whaleapi/social/media-topics:
+    post:
+      parameters:
+        - name: "title"
+          type: "string"
+          description: "Content title, Required when creating article"
+        - name: "body"
+          type: "string"
+          description: "Content"
+          required: true
+        - name: "images"
+          type: string[]
+          description: "Post pictures"
+      responses:
+        "200":
+          description: "Create success"
+          schema:
+            $ref: "#/definitions/create_media_topic_response"
+        "400":
+          description: "The query failed with an error in the request parameter."
+      request_body:
+        type: "python"
+        value: |
+          curl -v -XPOST https://openapi.longportapp.com/v1/whaleapi/social/media-topics \
+          -d '{ "body": "美股今天为什么涨了", "title": "" \
+          -H "X-Api-Signature: {签名}" -H "X-Api-Key: {AppKey}" \
+          -H "Authorization: {AccessToken}" -H "X-Timestamp: 1539095200.123"
+          -H "Content-Type: application/json; charset=utf-8"
+      response_body: { "code": 0, "message": "", "data": { "id": "1" } }
+definitions:
+  create_media_topic_response:
+    type: "object"
+    required:
+      - id
+    properties:
+      id:
+        type: "integer"
+        description: "Content ID"
+        required: true
