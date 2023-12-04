@@ -8,6 +8,20 @@ https://open.longportapp.com
 
 Please following the [CONTRIBUTING.md](./CONTRIBUTING.md) document.
 
+## Getting started 
+
+```shell
+$ cd whale-api-docs && yarn
+$ yarn dev:swagger
+# 新一个终端 Tab
+$ yarn dev:zh-HK  #繁体版本
+$ yarn dev:en  # EN 版本
+```
+
+浏览器输入 [localhost:8000/en](http://localhost:8000/en) 或者 [localhost:8000/zh-HK](http://localhost:8000/zh-HK)
+
+#### Canary & Prod 地址找李波
+
 ## Style Guide
 
 ### 文档需要遵守以下规范：
