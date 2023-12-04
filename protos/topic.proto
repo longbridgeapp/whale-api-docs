@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package demo;
+
+/*
+  社区活动服务，提供社区活动列表查询
+*/
+service DemoService {
+  // 获取社区动态列表，按分页查询。
+  rpc GetActivityList(GetActivityListReq) returns (GetActivityListResp);
+}
+
+message GetActivityListReq {
+  uint32 page = 1;
+  uint32 pageSize = 2;
+  string query = 3;
+}
+
+message GetActivityListResp {
+  repeated Activity activities = 1;
+  uint32 total = 2;
+}
+
+message Activity {
+  string type = 1;
+  string title = 2;
+  string content = 3;
+}

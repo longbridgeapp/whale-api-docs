@@ -6,3 +6,5 @@ yarn-error.log
 .cache-loader
 dist
 *--autogen.md
+protos/proto.json
+api/protos/

@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package demo;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+// Service demo.
+//
+// All leading comments will be copied to markdown.
+service Demo {
+    // `GET /users/:id`
+    //
+    // 查询一个用户的基本信息
+    // 
+    // ## Example
+    // 
+    // ```js
+    // fetch('/user')
+    //   .then(res => res.json())
+    //   .then(user => console.log(user))
+    // ```
+    rpc GetUser(User) returns (google.protobuf.Empty) {}
+    /*
+      更新一个用户的信息
+
+      `PUT /users/:id`
+
+      ## Example
+
+      ```js
+      fetch('/user', {
+        method: 'PUT',
+        body: JSON.stringify(user),
+      })
+      ```
+    */
+    rpc UpdateUser(User) returns (User) {}
+}
+
+// This is a description of a User message.
+message User {
+    // The id of user.
+    int32 id = 1;
+    // The name of user.
+    string name = 2;
+    // Is this user a vip.
+    bool vip = 3;
+    UserStatus status = 4;
+    // imported message value demo
+    google.protobuf.Timestamp created_at = 8;
+}
+
+enum UserStatus {
+    // User is active.
+    Active = 0;
+    // User is inactive.
+    Inactive = 1;
+}
